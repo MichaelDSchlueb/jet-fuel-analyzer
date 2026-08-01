@@ -34,6 +34,7 @@ private:
      double heading;
      double airspeed;
      double verticalSpeed;
+     double groundSpeed;
 
 public:
 

@@ -8,7 +8,6 @@ struct Coordinates {
     double longitude; // A change in longitude is cosine of heading
 
     // 3D & Environmental Ground Metrics
-    double verticalspeed;     // in feet per minute (FPM)
     double groundspeed;       // In knots (calculated speed over ground)
     double velocityN;         // North/South ground velocity component
     double velocityE;         // East/West ground velocity component

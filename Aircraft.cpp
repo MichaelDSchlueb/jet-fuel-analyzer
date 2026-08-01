@@ -67,7 +67,7 @@ void Aircraft::updatePhysics(double deltaTime, double windSpeed, double windDire
 			// position.groundSpeed = 0.0
 			// position.velocityN = 0.0
 			// poisition.veloctyE = 0.0
-	position.latitude = latitude + (velocityN * deltaTime * 0.00001);
-	position.longitude = longitude + (veloctyE * deltaTime * 0.00001);	
+	position.latitude = position.latitude + (position.velocityN * deltaTime * 0.00001);
+	position.longitude = position.longitude + (position.velocityE * deltaTime * 0.00001);	
 
 }
