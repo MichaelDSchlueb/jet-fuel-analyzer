@@ -10,6 +10,7 @@
 #include <chrono>
 
 enum struct FlightPhase {
+     GATE,
 	PUSHBACK,
 	TAXI,
 	TAKEOFF_ROLL,
@@ -36,6 +37,24 @@ private:
      double verticalSpeed;
      double groundSpeed;
 
+     void startEngine() { 
+          if (!isEngineStarted) {
+               isEngineStarting = true;
+               std::cout << "[SYSTEM] Engine start sequence initiated." << std::endl;
+          }
+     }
+
+     bool getIsEngineStarted() const { return isEngineStarted; }
+
+     // Explicit state transition interace is inline with (AUTOSAR Runnable / API)
+     void disconnectTug() {
+          if (currentPhase == FlightPhase::PUSHBACK) {
+               currentPhase = FlightPhase::TAXI;
+               groundSpeed = 0.0;
+               std::cout << "[SYSTEM] Tug disconnected. Aircraft is now in TAXI phase." << std::endl;
+          }
+     }
+
 public:
 
      Aircraft(std::string tailNum, std::string flightID, std::string destAport, std::string originAport);
@@ -48,5 +67,10 @@ public:
      const FuelSystem& getFuel() const { return fuel; }
      const Coordinates& getPosition() const { return position; }
      std::string getFlightID() const { return flightID; }
+
+private:
+     bool isEngineStarting = false;
+     bool isEngineStarted = false;
+     FlightPhase currentPhase = FlightPhase::GATE;
 };
 #endif
