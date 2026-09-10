@@ -37,23 +37,11 @@ private:
      double verticalSpeed;
      double groundSpeed;
 
-     void startEngine() { 
-          if (!isEngineStarted) {
-               isEngineStarting = true;
-               std::cout << "[SYSTEM] Engine start sequence initiated." << std::endl;
-          }
-     }
+     
 
      bool getIsEngineStarted() const { return isEngineStarted; }
 
-     // Explicit state transition interace is inline with (AUTOSAR Runnable / API)
-     void disconnectTug() {
-          if (currentPhase == FlightPhase::PUSHBACK) {
-               currentPhase = FlightPhase::TAXI;
-               groundSpeed = 0.0;
-               std::cout << "[SYSTEM] Tug disconnected. Aircraft is now in TAXI phase." << std::endl;
-          }
-     }
+     
 
 public:
 
@@ -67,6 +55,32 @@ public:
      const FuelSystem& getFuel() const { return fuel; }
      const Coordinates& getPosition() const { return position; }
      std::string getFlightID() const { return flightID; }
+
+     void startEngine() { 
+          if (!isEngineStarted) {
+               isEngineStarting = true;
+               std::cout << "[SYSTEM] Engine start sequence initiated." << std::endl;
+          }
+     }
+
+     // Explicit state transition interace is inline with (AUTOSAR Runnable / API)
+     void disconnectTug() {
+          if (currentPhase == FlightPhase::PUSHBACK) {
+               currentPhase = FlightPhase::TAXI;
+               groundSpeed = 0.0;
+               setTargetThrottle(22.0); // Set to Ground Idle
+               std::cout << "[SYSTEM] Tug disconnected. Aircraft is now in TAXI phase." << std::endl;
+
+          }
+     }
+
+     void setTargetThrottle(double percent) {
+          if (isEngineStarted) {
+               targetThrottle = std::max(22.0, percent);
+          } else {
+               targetThrottle = percent;
+          }
+     }
 
 private:
      bool isEngineStarting = false;

@@ -45,7 +45,9 @@ void Aircraft::updatePhysics(double deltaTime, double windSpeed, double windDire
     double gap = targetThrottle - propulsion.coreRPM;
 
         // Spool engine
-    propulsion.coreRPM = propulsion.coreRPM + (gap * deltaTime * SPOOL_CONSTANT);
+    propulsion.coreRPM += (gap * deltaTime * SPOOL_CONSTANT);
+
+	// There is no way to account for targetThrottle being moved up and down in a single tick. This is a limitation of the current physics model.
 
 	// caclculate exhaustGasTemp
     propulsion.egt = (propulsion.coreRPM * 10.0) + (verticalSpeed * .05);
@@ -67,10 +69,12 @@ void Aircraft::updatePhysics(double deltaTime, double windSpeed, double windDire
 
 	altitude += (climbPerSecond * deltaTime);
 
+	double thrustAboveIdle;
+
 	if (currentPhase == FlightPhase::TAXI) {
 		// If the aircraft is in the TAXI phase, limit the ground speed to a maximum of 20 knots
 		// calculate the thrust force
-		double thrustAboveIdle = propulsion.coreRPM - 22.0;
+		thrustAboveIdle = propulsion.coreRPM - 22.0;
 
 		if (groundSpeed == 0.0) {
 			if (thrustAboveIdle < STATIC_FRICTION_THRESHOLD) {
@@ -82,6 +86,20 @@ void Aircraft::updatePhysics(double deltaTime, double windSpeed, double windDire
 				groundSpeed = 1.0; // Initial movemenet speed upon breakaway
 			}
 		}
+	}
+
+	if (groundSpeed > 30.0 && targetThrottle < 70.0) {
+		groundSpeed = 30.0; // Limit ground speed to 30 knots when throttle is below 70%
+	}
+
+	if (propulsion.coreRPM >= 80.0) {
+		currentPhase = FlightPhase::TAKEOFF_ROLL;
+		std::cout << "[SYSTEM] Aircraft is now in TAKEOFF_ROLL phase." << std::endl;
+	}
+
+	if (airspeed >= 140.0) {
+		currentPhase = FlightPhase::CLIMB;
+		std::cout << "[SYSTEM] Aircraft is now in CLIMB phase." << std::endl;
 	}
 
 	// Calculate airspeed

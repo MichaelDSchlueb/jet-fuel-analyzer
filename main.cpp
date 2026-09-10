@@ -172,14 +172,30 @@ int main(int argc, char* argv[]) {
 //    FuelTelemetryComponent telemetryEngine;
 	Aircraft testPlane("N172DN", "DL1728", "MCO", "ATL");
 
-	std::cout << "CLEARED!" << std::endl;
+	testPlane.startEngine();
 //#endif
+    double deltaTime = 1.0; // 1 second time step for simulation
+    for (deltaTime; deltaTime <= 10; ++deltaTime) {
+        testPlane.updatePhysics(deltaTime, 0.0, 0.0);
+    }
 
-//    std::cout << "\nStarting telemetry capture..." << std::endl;
-//    for (int cycle = 1; cycle <= 3; ++cycle) {
-//        telemetryEngine.Cyclical_Sensor_Read();
-//    }
+    testPlane.disconnectTug();
+
+    for (deltaTime; deltaTime <= 25; ++deltaTime) {
+        testPlane.updatePhysics(deltaTime, 0.0, 0.0);
+    }
+
+    testPlane.setTargetThrottle(35.0);
+
+    for (double deltaTime; deltaTime <= 30.0; ++deltaTime) {
+        testPlane.updatePhysics(deltaTime, 0.0, 0.0);
+    }
     
+    testPlane.setTargetThrottle(85.0);
+
+    for (double deltaTime; deltaTime <= 50.0; ++deltaTime) {
+        testPlane.updatePhysics(deltaTime, 0.0, 0.0);
+    }
 //    telemetryEngine.Flush_To_Bronze_Layer();
 
     // Give asynchronous ack loop callbacks a brief window to safely resolve before killing main thread execution context
