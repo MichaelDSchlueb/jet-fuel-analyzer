@@ -171,30 +171,43 @@ int main(int argc, char* argv[]) {
     
 //    FuelTelemetryComponent telemetryEngine;
 	Aircraft testPlane("N172DN", "DL1728", "MCO", "ATL");
+    std::cout << "[SYSTEM] Aircraft instance created with tail number: " << testPlane.getFlightID() << std::endl;
 
 	testPlane.startEngine();
 //#endif
     double deltaTime = 1.0; // 1 second time step for simulation
-    for (deltaTime; deltaTime <= 10; ++deltaTime) {
+    for (int tick = 0; tick < 30; ++tick) {
         testPlane.updatePhysics(deltaTime, 0.0, 0.0);
+        // flush to bronze layer
     }
 
     testPlane.disconnectTug();
 
-    for (deltaTime; deltaTime <= 25; ++deltaTime) {
-        testPlane.updatePhysics(deltaTime, 0.0, 0.0);
-    }
-
     testPlane.setTargetThrottle(35.0);
 
-    for (double deltaTime; deltaTime <= 30.0; ++deltaTime) {
+    // Taxi Phase
+
+    for (int tick = 0; tick < 30; ++tick) {
         testPlane.updatePhysics(deltaTime, 0.0, 0.0);
+        // flush to bronze layer
+    }
+
+    testPlane.setTargetThrottle(90.0);
+
+    // Takeoff Roll Phase
+
+    for (int tick = 0; tick < 30; ++tick) {
+        testPlane.updatePhysics(deltaTime, 0.0, 0.0);
+        // flush to bronze layer
     }
     
-    testPlane.setTargetThrottle(85.0);
+    testPlane.setTargetThrottle(100.0);
 
-    for (double deltaTime; deltaTime <= 50.0; ++deltaTime) {
+    // Climb Phase
+
+    for (int tick = 0; tick < 30; ++tick) {
         testPlane.updatePhysics(deltaTime, 0.0, 0.0);
+        // flush to bronze layer
     }
 //    telemetryEngine.Flush_To_Bronze_Layer();
 

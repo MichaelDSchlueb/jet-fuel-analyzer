@@ -29,7 +29,6 @@ private:
      std::string flightID; // The flight call sign
      std::string destinationAirport;
      std::string originAirport;
-     FlightPhase currentPhase;
 
      double targetThrottle;
      double altitude;
@@ -60,6 +59,7 @@ public:
      void startEngine() { 
           if (!isEngineStarted) {
                isEngineStarting = true;
+               currentPhase = FlightPhase::PUSHBACK;
                std::cout << "[SYSTEM] Engine start sequence initiated." << std::endl;
           }
      }
