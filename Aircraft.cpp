@@ -48,6 +48,22 @@ void Aircraft::updatePhysics(double deltaTime, double windSpeed, double windDire
     propulsion.coreRPM += (gap * deltaTime * SPOOL_CONSTANT);
 
 	// There is no way to account for targetThrottle being moved up and down in a single tick. This is a limitation of the current physics model.
+	// Calculate airspeed
+    airspeed = propulsion.coreRPM * THROTTLE_COEFFICIENT;
+
+	if (currentPhase == FlightPhase::CLIMB || currentPhase == FlightPhase::CRUISE) {
+		double excessThrust = propulsion.coreRPM - 65.0;
+
+		if (excessThrust > 0.0 && airspeed > 100.0) {
+			double altitudePenalty = std::max(0.1, 1.0 - (altitude / 10000.0));
+
+			verticalSpeed = (excessThrust * THRUST_CONSTANT * 40.0) * (airspeed / 150.0) * altitudePenalty;
+		} else {
+			verticalSpeed = 0.0;
+		}
+	} else {
+		verticalSpeed = 0.0;
+	}
 
 	// caclculate exhaustGasTemp
     propulsion.egt = (propulsion.coreRPM * 10.0) + (verticalSpeed * .05);
@@ -102,8 +118,7 @@ void Aircraft::updatePhysics(double deltaTime, double windSpeed, double windDire
 		std::cout << "[SYSTEM] Aircraft is now in CLIMB phase." << std::endl;
 	}
 
-	// Calculate airspeed
-    airspeed = propulsion.coreRPM * THROTTLE_COEFFICIENT;
+	
 	// It's groundSpeed is moving in the opposite direction of where the nose is pointing
 	double aircraftNorth = airspeed * std::cos(heading);
 	

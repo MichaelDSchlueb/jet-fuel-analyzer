@@ -14,7 +14,8 @@ enum struct FlightPhase {
 	PUSHBACK,
 	TAXI,
 	TAKEOFF_ROLL,
-	CLIMB
+	CLIMB,
+     CRUISE
 };
 
 struct Aircraft {
