@@ -60,6 +60,9 @@ void Aircraft::updatePhysics(double deltaTime, double windSpeed, double windDire
 		// the ration of altitude to 10,000 feet.
 		// This will reduce the vertical speed as the aircraft climbs higher.
 		if (excessThrust > 0.0 && airspeed > 100.0) {
+			// Altitude penalty means that as the aircraft climbs higher
+			// there is a penalty applied because air density is lower
+			// and the engines are less efficient.
 			double altitudePenalty = std::max(0.1, 1.0 - (altitude / 10000.0));
 			// verticalSpeed is then calculated as
 			// the product of excessThrust, the thrust constant, a scaling factor of 40.0, the ratio of airspeed to 150.0, and the altitude penalty.
@@ -74,13 +77,14 @@ void Aircraft::updatePhysics(double deltaTime, double windSpeed, double windDire
 		verticalSpeed = 0.0;
 	}
 
-	// caclculate exhaustGasTemp
+	// calculate exhaustGasTemp
     propulsion.egt = (propulsion.coreRPM * 10.0) + (verticalSpeed * .05);
 
 	// Get the base burn
     double baseBurn = propulsion.coreRPM * THROTTLE_COEFFICIENT;
 
 	// calculate the climb penalty
+	// climb penalty is the penalty for gravity working against the aircraft as it climbs.
     double climbPenalty = verticalSpeed * GRAVITY_COEFFICIENT;
 
 	// get the burn rate based on baseBurn and climbPenalty
