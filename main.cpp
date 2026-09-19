@@ -11,6 +11,7 @@
 #include <sstream>
 #include <memory>
 #include "Aircraft.h"
+#include "WeatherClient.hpp"
 
 //usin g json = nlohmann::json
 
@@ -175,6 +176,9 @@ int main(int argc, char* argv[]) {
 
 	testPlane.startEngine();
 //#endif
+    WindData mcoWind = WeatherClient::getWindAtCoordinates(28.4312, -81.3081);
+
+    testPlane.updatePhysics(1.0, mcoWind.speedKnots, mcoWind.directionDegrees);
     double deltaTime = 1.0; // 1 second time step for simulation
     for (int tick = 0; tick < 30; ++tick) {
         testPlane.updatePhysics(deltaTime, 0.0, 0.0);

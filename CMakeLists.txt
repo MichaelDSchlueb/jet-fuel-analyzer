@@ -1,63 +1,57 @@
 cmake_minimum_required(VERSION 3.14)
 project(JetFuelAnalyzer CXX)
 
-# Require C++17 for CPR and JSON libraries
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
 
-# ------------------------------------------------------------------------------
-# 1. Fetch JSON & HTTP Libraries
-# ------------------------------------------------------------------------------
-# nlohmann/json for parsing Open-Meteo payload
+# --- Dependency: JSON (Always needed for parsing) ---
 FetchContent_Declare(
     json
     URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
 )
 FetchContent_MakeAvailable(json)
 
-# CPR (C++ Requests wrapper for cURL)
-FetchContent_Declare(
-    cpr
-    GIT_REPOSITORY https://github.com/libcpr/cpr.git
-    GIT_TAG        1.10.x
-)
-FetchContent_MakeAvailable(cpr)
+# --- Dependency: CPR (Linux / Production Only) ---
+if(UNIX AND NOT APPLE)
+    set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        cpr
+        GIT_REPOSITORY https://github.com/libcpr/cpr.git
+        GIT_TAG        1.10.x
+    )
+    FetchContent_MakeAvailable(cpr)
+endif()
 
-# ------------------------------------------------------------------------------
-# 2. Platform-Specific Setup
-# ------------------------------------------------------------------------------
+# --- Target Configuration ---
+include_directories(src)
+
 if(UNIX AND NOT APPLE)
     set(AWS_IOT_SDK_ROOT "/opt/aws-iot-sdk")
     include_directories(${AWS_IOT_SDK_ROOT}/include)
 endif()
 
-include_directories(src)
-
-# ------------------------------------------------------------------------------
-# 3. Target Definition
-# ------------------------------------------------------------------------------
 add_executable(jet_fuel_analyzer_node
     main.cpp
     Aircraft.cpp
     EngineInstruments.cpp
+    WeatherClient.cpp
 )
 
-# ------------------------------------------------------------------------------
-# 4. Link Libraries
-# ------------------------------------------------------------------------------
-# Link HTTP and JSON modules cross-platform
-target_link_libraries(jet_fuel_analyzer_node
-    PRIVATE
-    cpr::cpr
-    nlohmann_json::nlohmann_json
-)
+# Common Libraries
+target_link_libraries(jet_fuel_analyzer_node PRIVATE nlohmann_json::nlohmann_json)
 
-# Link AWS SDK and Linux system dependencies when building on EC2
+# Windows Native Libraries (No downloads or cURL required)
+if(WIN32)
+    target_link_libraries(jet_fuel_analyzer_node PRIVATE wininet ws2_32)
+endif()
+
+# Linux AWS & CPR Linking
 if(UNIX AND NOT APPLE)
     target_link_libraries(jet_fuel_analyzer_node
         PRIVATE
+        cpr::cpr
         ${AWS_IOT_SDK_ROOT}/lib64/libaws-crt-cpp.a
         ${AWS_IOT_SDK_ROOT}/lib64/libaws-c-mqtt.a
         ${AWS_IOT_SDK_ROOT}/lib64/libaws-c-s3.a
